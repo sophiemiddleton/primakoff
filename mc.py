@@ -34,7 +34,7 @@ def tsai_form_factor(q2, A, Z):
     apval = 773.0/(0.0005111*numpy.power(Z,2./3.))
     dval = 0.164/numpy.power(A,2./3.)
 
-    return (1./Z) * ((Z**2*(aval**2*t/(1+aval**2*t))**2*(1/(1+t/dval))**2)+Z*(apval**2*t/(1+apval**2*t))**2*((1+t*inelastic1)/(1+t*inelastic2)**4)**2)**0.5
+    return (1./Z) * ((Z**2*(aval**2*t/(1+aval**2*t))**2*(1/(1+t/dval))**2)+Z*(apval**2*t/(1+apval**2*t))**2*((1+t*inelastic1)/(1+t*inelastic2)**4))**0.5
 
 def form_factor(q2, A, Z):
     #return helm_form_factor(q2, A, Z)
