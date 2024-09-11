@@ -30,7 +30,8 @@ def create_xml_event(event, ma, mN):
     photon = particle_string(PID=22, status = -1, mother1 =0,mother2 =0,color1=0,color2=0,px=event[0,1],py=event[0,2],pz=event[0,3],E=event[0,0], mass=0,vtim=0,helicity=0) + '\n'
     nucleus = particle_string(PID=623, status = -1, mother1 =0,mother2 =0,color1=0,color2=0,px=0,py=0,pz=0,E=mN, mass=mN,vtim=0,helicity=0)+ '\n'
 
-    ALP = particle_string(PID=666, status = 2, mother1 =1,mother2 =2,color1=0,color2=0,px=event[1,1],py=event[1,2],pz=event[1,3],E=event[1,0], mass=ma,vtim=0,helicity=0)+ '\n'
+    # use vtim field to store the decay time in cm of the ALP. Use this to reconstruct the displaced vertex 
+    ALP = particle_string(PID=666, status = 2, mother1 =1,mother2 =2,color1=0,color2=0,px=event[1,1],py=event[1,2],pz=event[1,3],E=event[1,0], mass=ma,vtim=event[5][0],helicity=0)+ '\n'
     nucleus_prime = particle_string(PID=623, status = 1, mother1 =0,mother2 =0,color1=0,color2=0,px=event[2,1],py=event[2,2],pz=event[2,3],E=event[2,0], mass=mN,vtim=0,helicity=0)+ '\n'
 
     daughter1 = particle_string(PID=22, status = 1, mother1 =3,mother2 =0,color1=0,color2=0,px=event[3,1],py=event[3,2],pz=event[3,3],E=event[3,0], mass=0,vtim=0,helicity=0) + '\n'

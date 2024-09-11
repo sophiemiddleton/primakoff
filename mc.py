@@ -3,6 +3,10 @@ from scipy.special import spherical_jn
 from IPython.display import clear_output
 import time
 from scipy import integrate
+from multiprocessing import Pool
+from tqdm import tqdm
+from functools import partial
+import os
 
 def helm_form_factor(q2, A, Z):
     """
@@ -483,5 +487,67 @@ def generate_primakoff_events(photons, ma, mN, A, Z, tau, small_t_cut_over_t0 = 
     
     return numpy.array(output)
 
+def parallel_helper(params, photon):
+    ma = params['ma']
+    mN = params['mN']
+    A = params['A']
+    Z = params['Z']
+    tau = params['tau']
+    small_t_cut_over_t0 = params['small_t_cut_over_t0']
+
+    event = numpy.zeros((6,4))
+
+    if photon[0] < ma + (ma**2)/(2*mN):
+        return np.array([photon])
+    
+    event[0] = photon
+    pa, k1, k2, x = generate_event(photon, ma, mN, A, Z,tau, small_t_cut_over_t0)
+
+    pN = nucleus_4_momenta(mN, photon[1:], pa[1:])
+
+    event[1] = pa
+    event[2] = pN
+    event[3] = k1
+    event[4] = k2
+    event[5] = x
+
+    return event
+
+def generate_primakoff_events_in_parallel(photons, ma, mN, A, Z, tau, small_t_cut_over_t0 = 100, print_output = False, cpu_count=os.cpu_count(), chunksize=1):
+    """
+    Generates Primakoff (gamma + N > ALP + N)  events from a list of incoming photons
+    Args:
+        photons: list of incoming photon 4-momenta, shape (N,4)
+        ma : Mass of the produced ALP
+        mN : mass of the target nucleus
+        tau : Lifetime of the particle
+        small_t_cut_over_t0: smallest Mandelstam t to consider relative to the kinematic cutoff t0. Default 100. i.e. t 
+            values are smaples in the range [t0*small_t_cut_over_t0, t0]
+    
+    Returns:
+        output = (N',6,4) array containing a list of events that produced an ALP. N' can be less than N if not 
+        all photons have enough energy to produce an ALP. Each event is a list of five four-momenta for the 
+        incoming photon, ALP, scattered nucleus, ALP decay photon1, ALP decay photon2. The last entry in 
+        each event is the decay four-position generated based on the lifetime tau.
+    """
+    output = []
+
+    start = time.time()
+
+    params = {}
+    params['ma'] = ma 
+    params['mN'] = mN 
+    params['A'] = A
+    params['Z'] = Z 
+    params['tau'] = tau
+    params['small_t_cut_over_t0'] = small_t_cut_over_t0 
+
+    pool = Pool(cpu_count)
+    for out in tqdm(pool.imap_unordered(func=partial(parallel_helper, params), iterable=photons, chunksize=chunksize), total=len(photons)):
+        output.append(out)
+    pool.close()
+    pool.join()
+    
+    return numpy.array(output)
 
 
