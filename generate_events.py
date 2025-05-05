@@ -90,7 +90,7 @@ def main():
 
     bootstrap_sample(ldmx_photons, 10)
 
-    ldmx_photons_8GeV = np.loadtxt('data_from_sophie_8gev_50K.csv',delimiter=',')[:,1:] / 1000. # convert MeV to GeV
+    ldmx_photons_8GeV = np.loadtxt('data_with_electrons.csv',delimiter=',')[:,1:] / 1000. # convert MeV to GeV
 
     len(ldmx_photons_8GeV)
 
@@ -107,9 +107,9 @@ def main():
     plt.xscale('log')
     plt.yscale('log')
 
-    len(ldmx_photons[ldmx_photons[:,0] > 1e-1])/len(ldmx_photons), len(ldmx_photons_8GeV[ldmx_photons_8GeV[:,0] > 2e-1])/len(ldmx_photons_8GeV)
+    #len(ldmx_photons[ldmx_photons[:,0] > 1e-1])/len(ldmx_photons), len(ldmx_photons_8GeV[ldmx_photons_8GeV[:,0] > 2e-1])/len(ldmx_photons_8GeV)
 
-    len(ldmx_photons_8GeV[ldmx_photons_8GeV[:,0] > 5e-2])
+    #len(ldmx_photons_8GeV[ldmx_photons_8GeV[:,0] > 5e-2])
 
     ebins = np.logspace(-3,np.log10(8),20)
     plt.hist(ldmx_photons_8GeV[:,0],bins=ebins)
@@ -122,7 +122,7 @@ def main():
     """
     #ma_list = [0.01, 0.02, 0.03, 0.04, 0.05, 0.08, 0.1, 0.12, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
     ma_list = [0.1]
-    coupling =1e-4
+    coupling =1e-3
     A = 183.84
     Z = 74 #Tungsten
 
@@ -138,7 +138,7 @@ def main():
     direct_events = []
     xsec_list_8_GeV = []
     for ma in ma_list:
-        out_dir_name = "../primakoff_events_8_GeV/"+"m_" + str(int(np.floor(ma*1000.)))+"_g_"+str(coupling)
+        out_dir_name = "../primakoff_events_8_GeV_with_elec/"+"m_" + str(int(np.floor(ma*1000.)))+"_g_"+str(coupling)
         out_lhe_fname = "unweighted_events.lhe"
         os.mkdir(out_dir_name)
 

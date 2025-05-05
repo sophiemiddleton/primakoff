@@ -201,7 +201,7 @@ def t_distribution(t, ma, Mn, A, Z, Egamma):
     Returns:
         disigmadt = distribution of t
     """
-
+    #print("mc::t_distribution")
     s = s_term(Mn,Egamma)
     F = form_factor(abs(t), A, Z)
 
@@ -229,8 +229,9 @@ def t_bounds(ma, Mn, Egamma):
         Mn : nucleus mass
         Egamma : photon energy
     """
-
+    #print("mc::t_bounds")
     s = s_term(Mn,Egamma)
+
     pgcm = (s-Mn**2) / (2*numpy.sqrt(s))
     pacm = numpy.sqrt( ((s + ma**2 - Mn**2)/(2*numpy.sqrt(s)))**2 - ma**2)
     t0 = ma**4/(4*s) - (pgcm - pacm)**2
@@ -248,9 +249,10 @@ def generate_t(ma, Mn, A, Z, Egamma, small_t_cut_over_t0 = 100):
     Returns:
         t = randomly generated Mandelstam t
     """
+
+    #print("mc::generate_t")
     s = s_term(Mn,Egamma)
     t1, t0 = t_bounds(ma, Mn, Egamma)
-
     t_max = (-2*ma**4 *Mn**2) / (-ma**2 * Mn**2 + Mn**4 - ma**2 *s -2 * Mn**2 * s + s**2)
     c = t_distribution(t_max, ma, Mn, A, Z, Egamma)*1.1
     while True:
@@ -284,7 +286,7 @@ def ngamma(pgamma):
     Output:
     ng = unit vector in the direction of the incoming photon
     """
-    pgabs = numpy.linalg.norm(pgamma) 
+    pgabs = numpy.linalg.norm(pgamma)
     ng = pgamma/pgabs
     return ng
 
@@ -303,7 +305,7 @@ def ALP_parallel(mN, ma, Ea, pabs, Egamma, pgamma):
     """
 
     # cosine of the angle between the photon and the ALP
-    cos_theta = (2*Ea*Egamma - 2*mN*(Egamma- Ea) - ma**2) / (2*Egamma*pabs) 
+    cos_theta = (2*Ea*Egamma - 2*mN*(Egamma- Ea) - ma**2) / (2*Egamma*pabs)
     p_parallel = cos_theta*pabs*ngamma(pgamma)
     return p_parallel
 
@@ -336,7 +338,7 @@ def ALP_perpendicular(pabs, p_parallel, pgamma):
         p_perpendicular = Perpendicular Component of the ALP's momentum
     """
     p_perpabs_sq = pabs**2 - numpy.dot(p_parallel,p_parallel)
-    
+
     if numpy.fabs(p_perpabs_sq) < 1e-8:
         return numpy.zeros(3)
 
@@ -353,7 +355,7 @@ def ALP_perpendicular(pabs, p_parallel, pgamma):
 
 def ALP_momentum_from_t(ma, mN, Egamma, pgamma, t):
     """
-    Construct an ALP 4 momentum provided a value of the Mandelstam t in the gamma + N > ALP + N scattering 
+    Construct an ALP 4 momentum provided a value of the Mandelstam t in the gamma + N > ALP + N scattering
     Args:
         ma = Mass of the Axion-like Particle
         mN = Mass of the Nucleus
@@ -387,6 +389,7 @@ def ALP_momenta(ma, mN, A, Z, Egamma, pgamma, small_t_cut_over_t0 = 100):
     Returns:
         pa = 4 momenta of the outgoing ALP
     """
+    #print("mc::ALP_momenta")
     t = generate_t(ma, mN, A, Z, Egamma, small_t_cut_over_t0)
 
     return ALP_momentum_from_t(ma, mN, Egamma, pgamma, t)
@@ -399,18 +402,20 @@ def generate_event(p_gamma, ma, mN, A, Z, tau, small_t_cut_over_t0 = 100):
         ma : Mass of the produced ALP
         mN : mass of the target nucleus
         tau : Lifetime of the particle
-        small_t_cut_over_t0: smallest Mandelstam t to consider relative to the kinematic cutoff t0. Default 100. i.e. t 
+        small_t_cut_over_t0: smallest Mandelstam t to consider relative to the kinematic cutoff t0. Default 100. i.e. t
             values are smaples in the range [t0*small_t_cut_over_t0, t0]
-    
-    Returns: 
+
+    Returns:
         pa = four-momentum of the ALP
         k1, k2 = 4-momenta of the 2 daughter photons of the axion decay
         x = decay four-position of the ALP
 
     """
+    #print("mc::generate_event")
     ### Scattering ###
     Egamma = p_gamma[0]
     pgamma = p_gamma[1:]
+
     pa = ALP_momenta(ma, mN, A, Z, Egamma, pgamma, small_t_cut_over_t0)
 
     ### Decay ###
@@ -446,48 +451,50 @@ def generate_primakoff_events(photons, ma, mN, A, Z, tau, small_t_cut_over_t0 = 
         ma : Mass of the produced ALP
         mN : mass of the target nucleus
         tau : Lifetime of the particle
-        small_t_cut_over_t0: smallest Mandelstam t to consider relative to the kinematic cutoff t0. Default 100. i.e. t 
+        small_t_cut_over_t0: smallest Mandelstam t to consider relative to the kinematic cutoff t0. Default 100. i.e. t
             values are smaples in the range [t0*small_t_cut_over_t0, t0]
-    
+
     Returns:
-        output = (N',6,4) array containing a list of events that produced an ALP. N' can be less than N if not 
-        all photons have enough energy to produce an ALP. Each event is a list of five four-momenta for the 
-        incoming photon, ALP, scattered nucleus, ALP decay photon1, ALP decay photon2. The last entry in 
+        output = (N',6,4) array containing a list of events that produced an ALP. N' can be less than N if not
+        all photons have enough energy to produce an ALP. Each event is a list of five four-momenta for the
+        incoming photon, ALP, scattered nucleus, ALP decay photon1, ALP decay photon2. The last entry in
         each event is the decay four-position generated based on the lifetime tau.
     """
     output = []
 
     start = time.time()
     for i in range(len(photons)):
-        
-        event = numpy.zeros((6,4))
-    
+
+        event = numpy.zeros((7,4))
+
         if photons[i][0] < ma + (ma**2)/(2*mN):
             continue
-        
-        event[0] = photons[i]
-        pa, k1, k2, x = generate_event(photons[i], ma, mN, A, Z,tau, small_t_cut_over_t0)
-    
-        pN = nucleus_4_momenta(mN, photons[i][1:], pa[1:])
-    
+
+        event[0] = photons[i][1:5]
+        pa, k1, k2, x = generate_event(photons[i][1:5], ma, mN, A, Z,tau, small_t_cut_over_t0)
+
+        pN = nucleus_4_momenta(mN, photons[i][1:5], pa[1:])
+
         event[1] = pa
         event[2] = pN
         event[3] = k1
         event[4] = k2
         event[5] = x
-        
+        event[6] = photon[5:] # new electron
         output.append(event)
         if print_output:
             print(i)
             clear_output(wait=True)
-    
+
     end = time.time()
     if print_output:
         print("This took me", (end-start)/60, "minutes to process", len(photons), "events")
-    
+
     return numpy.array(output)
 
 def parallel_helper(params, photon):
+    #print("mc::parallel_helper")
+
     ma = params['ma']
     mN = params['mN']
     A = params['A']
@@ -495,21 +502,23 @@ def parallel_helper(params, photon):
     tau = params['tau']
     small_t_cut_over_t0 = params['small_t_cut_over_t0']
 
-    event = numpy.zeros((6,4))
+    event = numpy.zeros((7,4))
 
     if photon[0] < ma + (ma**2)/(2*mN):
-        return np.array([photon])
-    
-    event[0] = photon
-    pa, k1, k2, x = generate_event(photon, ma, mN, A, Z,tau, small_t_cut_over_t0)
+        return np.array([photon[0:4]])
 
-    pN = nucleus_4_momenta(mN, photon[1:], pa[1:])
+    event[0] = photon[0:4]
+
+    pa, k1, k2, x = generate_event(photon[0:4], ma, mN, A, Z,tau, small_t_cut_over_t0)
+
+    pN = nucleus_4_momenta(mN, photon[1:4], pa[1:])
 
     event[1] = pa
     event[2] = pN
     event[3] = k1
     event[4] = k2
     event[5] = x
+    event[6] = photon[4:] # new electron
 
     return event
 
@@ -521,13 +530,13 @@ def generate_primakoff_events_in_parallel(photons, ma, mN, A, Z, tau, small_t_cu
         ma : Mass of the produced ALP
         mN : mass of the target nucleus
         tau : Lifetime of the particle
-        small_t_cut_over_t0: smallest Mandelstam t to consider relative to the kinematic cutoff t0. Default 100. i.e. t 
+        small_t_cut_over_t0: smallest Mandelstam t to consider relative to the kinematic cutoff t0. Default 100. i.e. t
             values are smaples in the range [t0*small_t_cut_over_t0, t0]
-    
+
     Returns:
-        output = (N',6,4) array containing a list of events that produced an ALP. N' can be less than N if not 
-        all photons have enough energy to produce an ALP. Each event is a list of five four-momenta for the 
-        incoming photon, ALP, scattered nucleus, ALP decay photon1, ALP decay photon2. The last entry in 
+        output = (N',6,4) array containing a list of events that produced an ALP. N' can be less than N if not
+        all photons have enough energy to produce an ALP. Each event is a list of five four-momenta for the
+        incoming photon, ALP, scattered nucleus, ALP decay photon1, ALP decay photon2. The last entry in
         each event is the decay four-position generated based on the lifetime tau.
     """
     output = []
@@ -535,19 +544,17 @@ def generate_primakoff_events_in_parallel(photons, ma, mN, A, Z, tau, small_t_cu
     start = time.time()
 
     params = {}
-    params['ma'] = ma 
-    params['mN'] = mN 
+    params['ma'] = ma
+    params['mN'] = mN
     params['A'] = A
-    params['Z'] = Z 
+    params['Z'] = Z
     params['tau'] = tau
-    params['small_t_cut_over_t0'] = small_t_cut_over_t0 
+    params['small_t_cut_over_t0'] = small_t_cut_over_t0
 
     pool = Pool(cpu_count)
     for out in tqdm(pool.imap_unordered(func=partial(parallel_helper, params), iterable=photons, chunksize=chunksize), total=len(photons)):
         output.append(out)
     pool.close()
     pool.join()
-    
+
     return numpy.array(output)
-
-
