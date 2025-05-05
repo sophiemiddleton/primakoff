@@ -156,7 +156,7 @@ def main():
         viable_photons = ldmx_photons_8GeV[photon_mask]
         bootstrapped_viable_photons = bootstrap_sample(viable_photons, Nboots)
 
-        result_dict['events'] = generate_primakoff_events_in_parallel(bootstrapped_viable_photons,ma, mN, A, Z,ctau, small_t_cut_over_t0=1000, print_output = True)
+        result_dict['events'] = generate_primakoff_events_in_parallel(bootstrapped_viable_photons,ma, mN, A, Z,ctau, small_t_cut_over_t0=1000, print_output = True, uniform=True)
         direct_events.append(result_dict)
         xsec_list_8_GeV.append([ma, result_dict['sigma']['sigma']])
         run_info_str = "<runinfo>" + "\n" \

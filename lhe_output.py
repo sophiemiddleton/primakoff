@@ -33,7 +33,7 @@ def create_xml_event(event, ma, mN):
     dv = event[5] # ALP decay vertex
     # use vtim field to store the decay time in cm of the ALP. Use this to reconstruct the displaced vertex
     # example: 11  1    1    2    0    0 px py pz e me 0.0000e+00 1.0000e+00
-    electron=particle_string(PID=11, status = 1, mother1 =0,mother2 =0,color1=0,color2=0,px=event[6,1],py=event[6,2],pz=event[6,3],E=event[6,0], mass=5.1099890000e-04,vtim=0,helicity=0) + '\n'
+    electron=particle_string(PID=11, status = 1, mother1 =1,mother2 =2,color1=0,color2=0,px=event[6,1],py=event[6,2],pz=event[6,3],E=event[6,0], mass=5.1099890000e-04,vtim=0,helicity=1) + '\n'
     ALP = particle_string(PID=666, status = 2, mother1 =1,mother2 =2,color1=0,color2=0,px=event[1,1],py=event[1,2],pz=event[1,3],E=event[1,0], mass=ma,vtim=dv[0],helicity=0)+ '\n'
     nucleus_prime = particle_string(PID=623, status = 1, mother1 =0,mother2 =0,color1=0,color2=0,px=event[2,1],py=event[2,2],pz=event[2,3],E=event[2,0], mass=mN,vtim=0,helicity=0)+ '\n'
 

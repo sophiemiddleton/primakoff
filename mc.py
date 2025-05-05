@@ -443,7 +443,7 @@ def nucleus_4_momenta(mN, pgamma, pa):
     return pN_prime
 
 
-def generate_primakoff_events(photons, ma, mN, A, Z, tau, small_t_cut_over_t0 = 100, print_output = False):
+def generate_primakoff_events(photons, ma, mN, A, Z, tau, small_t_cut_over_t0 = 100, print_output = False, uniform=True):
     """
     Generates Primakoff (gamma + N > ALP + N)  events from a list of incoming photons
     Args:
@@ -479,7 +479,19 @@ def generate_primakoff_events(photons, ma, mN, A, Z, tau, small_t_cut_over_t0 = 
         event[2] = pN
         event[3] = k1
         event[4] = k2
-        event[5] = x
+        if (uniform == False):
+            event[5] = x
+            print(x)
+        else:
+            d_vertex = numpy.array((-9999.,-9999.,-9999.))
+            t = 0.
+            d = numpy.random.uniform(750,5500)
+            x,y,z,t = 0., 0., 0., t
+            Ap_3mom = numpy.array((photon[5],photon[6],photon[7]))
+            c_vertex = numpy.array((x,y,z))
+            d_vertex = c_vertex + Ap_3mom/numpy.linalg.norm(Ap_3mom) * d
+            x =  [d_vertex[0],d_vertex[1],d_vertex[2],d]
+            event[5] = x
         event[6] = photon[5:] # new electron
         output.append(event)
         if print_output:
@@ -492,7 +504,7 @@ def generate_primakoff_events(photons, ma, mN, A, Z, tau, small_t_cut_over_t0 = 
 
     return numpy.array(output)
 
-def parallel_helper(params, photon):
+def parallel_helper(params, photon, uniform=True):
     #print("mc::parallel_helper")
 
     ma = params['ma']
@@ -505,7 +517,7 @@ def parallel_helper(params, photon):
     event = numpy.zeros((7,4))
 
     if photon[0] < ma + (ma**2)/(2*mN):
-        return np.array([photon[0:4]])
+        return numpy.array([photon[0:4]])
 
     event[0] = photon[0:4]
 
@@ -517,12 +529,23 @@ def parallel_helper(params, photon):
     event[2] = pN
     event[3] = k1
     event[4] = k2
-    event[5] = x
+    if (uniform == False):
+        event[5] = x
+    else:
+        d_vertex = numpy.array((-9999.,-9999.,-9999.))
+        t = 0.
+        d = numpy.random.uniform(750,5500)
+        x,y,z,t = 0., 0., 0., t
+        Ap_3mom = numpy.array((photon[5],photon[6],photon[7]))
+        c_vertex = numpy.array((x,y,z))
+        d_vertex = c_vertex + Ap_3mom/numpy.linalg.norm(Ap_3mom) * d
+        x =  [d_vertex[0],d_vertex[1],d_vertex[2],d]
+        event[5] = x
     event[6] = photon[4:] # new electron
 
     return event
 
-def generate_primakoff_events_in_parallel(photons, ma, mN, A, Z, tau, small_t_cut_over_t0 = 100, print_output = False, cpu_count=os.cpu_count(), chunksize=1):
+def generate_primakoff_events_in_parallel(photons, ma, mN, A, Z, tau, small_t_cut_over_t0 = 100, print_output = False, cpu_count=os.cpu_count(), chunksize=1, uniform=True):
     """
     Generates Primakoff (gamma + N > ALP + N)  events from a list of incoming photons
     Args:
