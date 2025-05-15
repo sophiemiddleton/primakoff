@@ -121,7 +121,7 @@ def main():
     Nboots samples will be generated, regardless of the actual number of viable photons in the original photon sample.
     """
     #ma_list = [0.01, 0.02, 0.03, 0.04, 0.05, 0.08, 0.1, 0.12, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
-    ma_list = [0.1]
+    ma_list = [0.075]
     coupling =1e-3
     A = 183.84
     Z = 74 #Tungsten
@@ -133,13 +133,14 @@ def main():
     N_mcpN = 50000 # actual number of pN collisions simulated
     N_photon_subset = len(ldmx_photons_8GeV) #20000 # number of photons to use to speed up calculation of cross-section
 
-    Nboots = 200000 # number of samples to generate
+    Nboots = 100000 # number of samples to generate
 
     direct_events = []
     xsec_list_8_GeV = []
     for ma in ma_list:
         out_dir_name = "../primakoff_events_8_GeV_with_elec/"+"m_" + str(int(np.floor(ma*1000.)))+"_g_"+str(coupling)
-        out_lhe_fname = "unweighted_events.lhe"
+        out_lhe_fname_target = "m_" + str(int(np.floor(ma*1000.)))+"uniform_target.lhe"
+        out_lhe_fname_decay = "m_" + str(int(np.floor(ma*1000.)))+"uniform_decay.lhe"
         os.mkdir(out_dir_name)
 
         # cross-section and width computed for a fiducial value the coupling
@@ -171,7 +172,7 @@ def main():
                  + "# Number of Events: " + str(len(result_dict['events'])) + "\n" \
                  + "# Integrated weight (for gag = 1e-3/GeV) [pb] : "+str(result_dict['sigma']['sigma']*1e36*1e-6) + "\n" + "</runinfo>" + "\n"
         print(run_info_str)
-        create_LHE_file(ma, mN, result_dict['events'], out_dir_name+"/"+out_lhe_fname, header_str = run_info_str)
+        create_LHE_file(ma, mN, result_dict['events'], out_dir_name+"/"+out_lhe_fname_target,out_dir_name+"/"+out_lhe_fname_decay, header_str = run_info_str)
     xsec_list_8_GeV = np.array(xsec_list_8_GeV)
     print("number of 8GeV events",len(result_dict['events']))
     plt.plot(xsec_list_8_GeV[:,0],xsec_list_8_GeV[:,1],'-o')

@@ -485,7 +485,7 @@ def generate_primakoff_events(photons, ma, mN, A, Z, tau, small_t_cut_over_t0 = 
         else:
             d_vertex = numpy.array((-9999.,-9999.,-9999.))
             t = 0.
-            d = numpy.random.uniform(750,5500)
+            d = numpy.random.uniform(0,5500)
             x,y,z,t = 0., 0., 0., t
             Ap_3mom = numpy.array((photon[5],photon[6],photon[7]))
             c_vertex = numpy.array((x,y,z))
@@ -534,7 +534,7 @@ def parallel_helper(params, photon, uniform=True):
     else:
         d_vertex = numpy.array((-9999.,-9999.,-9999.))
         t = 0.
-        d = numpy.random.uniform(750,5500)
+        d = numpy.random.uniform(0,5500)
         x,y,z,t = 0., 0., 0., t
         Ap_3mom = numpy.array((photon[5],photon[6],photon[7]))
         c_vertex = numpy.array((x,y,z))
